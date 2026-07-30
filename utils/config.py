@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 # Stock metric labels and their corresponding data keys.
-METRICS: List[Tuple[str, str]] = [
+METRICS: list[tuple[str, str]] = [
     ("Price/Earnings", "pe"),
     ("Price/Sales", "ps"),
     ("Price/Book", "pb"),
@@ -20,18 +19,20 @@ METRICS: List[Tuple[str, str]] = [
 ]
 
 # Categories grouping related metrics for UI filtering.
-METRIC_CATEGORIES: Dict[str, List[Tuple[str, str]]] = {
+METRIC_CATEGORIES: dict[str, list[tuple[str, str]]] = {
     "Valuation Metrics": METRICS[0:4],
     "Debt Metrics": METRICS[4:7],
     "Efficiency Metrics": METRICS[7:11],
 }
 
 # Path to the static CSV file containing quarterly data.
-CSV_FILE_PATH: Path = Path("snp500.csv")
+# Resolved relative to the project root so the app runs from any directory.
+PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
+CSV_FILE_PATH: Path = PROJECT_ROOT / "snp500.csv"
 
 # Main window dimensions (width, height).
-WINDOW_WIDTH: int = 1200
-WINDOW_HEIGHT: int = 700
+WINDOW_WIDTH: int = 1300
+WINDOW_HEIGHT: int = 750
 
 # UI color settings.
 BACKGROUND_COLOR: str = "lightgrey"

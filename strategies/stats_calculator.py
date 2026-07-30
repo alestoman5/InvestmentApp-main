@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
+
 import pandas as pd
 
 
@@ -40,13 +41,14 @@ class StatsCalculator:
 
         returns = series.pct_change().dropna()
         volatility = (
-            returns.std() * (12 ** 0.5) * 100
+            returns.std() * (252 ** 0.5) * 100
             if not returns.empty else 0.0
         )
 
         drawdowns = (series / series.cummax() - 1) * 100
         max_drawdown = drawdowns.min()
 
+        # Annualized excess return over annualized volatility.
         risk_free_rate = 0.02
         sharpe_ratio = (
             ((annualized_return / 100 - risk_free_rate) /

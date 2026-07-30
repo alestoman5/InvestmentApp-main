@@ -3,7 +3,8 @@
 from __future__ import annotations
 from typing import Sequence, Optional, Callable, Tuple
 import tkinter as tk
-from tkinter import Frame, StringVar, Label, OptionMenu, Radiobutton, Spinbox, Button, messagebox
+from tkinter import Frame, StringVar, Label, OptionMenu, Radiobutton, Spinbox, Button
+import datetime as dt
 
 from utils.config import BACKGROUND_COLOR
 
@@ -14,18 +15,26 @@ class DateSelector(Frame):
     def __init__(
         self,
         master: tk.Misc,
-        start_year: int = 2010,
-        end_year: int = 2023,
+        years: Optional[Sequence[int]] = None,
+        default_year: Optional[int] = None,
+        default_quarter: str = "Q1",
     ) -> None:
         super().__init__(master, bg=BACKGROUND_COLOR)
-        self._year = StringVar(value=str(start_year))
-        self._quarter = StringVar(value="Q1")
 
-        years = [str(y) for y in range(start_year, end_year + 1)]
+        # Fall back to a generic range only if the data source offers nothing.
+        year_values = list(years) if years else list(
+            range(2010, dt.datetime.now().year + 1)
+        )
+        self._year = StringVar(
+            value=str(default_year if default_year is not None else year_values[0])
+        )
+        self._quarter = StringVar(value=default_quarter)
+
+        years_str = [str(y) for y in year_values]
         quarters = ["Q1", "Q2", "Q3", "Q4"]
 
         Label(self, text="Year:", bg=BACKGROUND_COLOR).grid(row=0, column=0, sticky="e", padx=5, pady=2)
-        year_menu = OptionMenu(self, self._year, *years)
+        year_menu = OptionMenu(self, self._year, *years_str)
         year_menu.config(width=6)
         year_menu.grid(row=0, column=1, sticky="w", padx=5, pady=2)
 
@@ -49,6 +58,7 @@ class MetricInput(Frame):
     ) -> None:
         super().__init__(master, bg=BACKGROUND_COLOR)
         self.key: str = key
+        self.label: str = label
         self.condition_var = StringVar(value="Any")
 
         Label(self, text=label, width=20, anchor="w", bg=BACKGROUND_COLOR).pack(side=tk.LEFT, padx=5)
@@ -60,14 +70,17 @@ class MetricInput(Frame):
         self._spin_val.pack(side=tk.LEFT, padx=5)
 
     def get_value(self) -> Optional[Tuple[str, float]]:
+        """Return (condition, threshold), or None when set to 'Any'.
+
+        Raises ValueError if the threshold is not a number.
+        """
         cond = self.condition_var.get()
         if cond == "Any":
             return None
         try:
             val = float(self._spin_val.get())
         except ValueError:
-            messagebox.showwarning("Input Error", f"{self.key}: invalid value")
-            return
+            raise ValueError(f"{self.label}: '{self._spin_val.get()}' is not a number.")
         return cond, val
 
 

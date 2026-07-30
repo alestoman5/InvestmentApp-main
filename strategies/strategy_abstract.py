@@ -3,16 +3,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Sequence, Optional, Union, Tuple
+from typing import Sequence, Optional, Union
 
 import pandas as pd
 from matplotlib.figure import Figure
 
-
 from strategies.data_fetcher import DataFetcher
-from strategies.stats_calculator import StatsCalculator
+from strategies.stats_calculator import StatsCalculator, StatsData
 from strategies.visualizer import Visualizer
-from strategies.stats_calculator import StatsData
 
 
 class StrategyBase(ABC):

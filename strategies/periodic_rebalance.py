@@ -14,11 +14,13 @@ class PeriodicRebalanceStrategy(StrategyBase):
     def simulate(self) -> None:
         """Populate portfolio_series with daily returns."""
         cols = [t for t in self._tickers if t in self._price_data.columns]
-        prices = self._price_data[cols].dropna(axis=1, how="all")
+        prices = self._price_data[cols].dropna(axis=1, how="all").ffill()
         if prices.empty:
             self.portfolio_series = pd.Series(dtype=float)
             return
 
-        daily_returns = prices.pct_change().fillna(0)
-        port_returns = daily_returns.mean(axis=1)
+        # mean() skips NaN, so tickers without a price yet are excluded from
+        # that day's average rather than counted as a 0% return.
+        daily_returns = prices.pct_change()
+        port_returns = daily_returns.mean(axis=1).fillna(0)
         self.portfolio_series = (1 + port_returns).cumprod()

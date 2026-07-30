@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Optional
 
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 from utils.config import GRAPH_COLOR
@@ -20,7 +19,10 @@ class Visualizer:
         if series.empty:
             raise ValueError("Portfolio series is empty.")
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+        # Build the Figure directly rather than via pyplot: a pyplot figure
+        # stays registered globally and leaks on every backtest run.
+        fig = Figure(figsize=(10, 6))
+        ax = fig.add_subplot(111)
         ax.plot(series, label="Equally Weighted Portfolio", color=GRAPH_COLOR)
         ax.set_title("Portfolio Performance")
         ax.set_xlabel("Date")

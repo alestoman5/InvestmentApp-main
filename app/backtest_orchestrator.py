@@ -38,15 +38,14 @@ class BacktestOrchestrator:
         thread.start()
 
     @staticmethod
-    def dates_from_quarter(year: int, quarter: str) -> Tuple[dt.date, dt.date]:
-        """Convert year and quarter to a date range (start on quarter end, end today)."""
+    def dates_from_quarter(year: int, quarter: str) -> dt.date:
+        """Return the last calendar day of the given year and quarter."""
         mapping = {"Q1": (3, 31), "Q2": (6, 30), "Q3": (9, 30), "Q4": (12, 31)}
         if quarter not in mapping:
             raise ValueError(f"Invalid quarter: {quarter}")
         month, day = mapping[quarter]
         start = dt.date(year, month, day)
-        end = dt.date.today()
-        return start, end
+        return start
 
     def _worker(
         self,
@@ -55,16 +54,20 @@ class BacktestOrchestrator:
     ) -> None:
         """Background worker performing the backtest."""
         try:
-            year = input_data.year
-            quarter = input_data.quarter
+            syear = input_data.syear
+            squarter = input_data.squarter
+            eyear = input_data.eyear
+            equarter = input_data.equarter
+
             filters = input_data.filters
             name = input_data.strategy_name
 
-            tickers = self._screener.filter_stocks(year, quarter, filters)
+            tickers = self._screener.filter_stocks(syear, squarter, filters)
             if not tickers:
                 result = ("warn", None, "No stocks met criteria.")
             else:
-                start, end = self.dates_from_quarter(year, quarter)
+                start = self.dates_from_quarter(syear, squarter)
+                end = self.dates_from_quarter(eyear, equarter)
                 strategy_cls = self._strategies.get(name)
                 if not strategy_cls:
                     raise ValueError(f"Unknown strategy: {name}")

@@ -4,7 +4,6 @@ from __future__ import annotations
 from datetime import date
 from typing import Sequence, Union
 
-import pandas as pd
 import yfinance as yf
 
 
@@ -17,7 +16,11 @@ class Downloader:
         start_date: Union[str, date],
         end_date: Union[str, date],
     ) -> pd.DataFrame:
-        """Return raw price data DataFrame or empty DataFrame on failure."""
+        """Return the raw yfinance price DataFrame.
+
+        Raises RuntimeError if the download fails, so the caller can surface
+        the reason instead of showing an empty result.
+        """
         try:
             return yf.download(
                 tickers=tickers,
@@ -25,7 +28,7 @@ class Downloader:
                 end=end_date,
                 group_by="ticker",
                 threads=True,
-                progress=True,
+                progress=False,
             )
-        except Exception:
-            return pd.DataFrame()
+        except Exception as exc:
+            raise RuntimeError(f"Failed to download price data: {exc}") from exc

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date
 import numpy as np
 import pandas as pd
 
@@ -16,7 +15,10 @@ class BuyAndHoldStrategy(StrategyBase):
     def simulate(self) -> None:
         """Populate portfolio_series with normalized prices."""
         cols = [t for t in self._tickers if t in self._price_data.columns]
-        prices = self._price_data[cols].dropna(axis=1, how="all")
+        prices = self._price_data[cols].dropna(axis=1, how="all").ffill()
+        # A ticker with no price on the first day would normalize to all-NaN
+        # and poison the portfolio average, so drop it.
+        prices = prices.loc[:, prices.iloc[0].notna()] if not prices.empty else prices
         if prices.empty:
             self.portfolio_series = pd.Series(dtype=float)
             return

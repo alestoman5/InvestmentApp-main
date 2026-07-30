@@ -33,15 +33,38 @@ class InvestmentApp:
         left_panel = tk.Frame(self.root, width=300, bg=BACKGROUND_COLOR)
         left_panel.pack(side=tk.LEFT, fill=tk.Y)
 
+        # Offer only the years the screening data actually covers.
+        years = screener.available_years()
+
         tk.Label(
             left_panel,
-            text="Date Settings",
+            text="Start Date:",
             bg=BACKGROUND_COLOR,
-            font=("Arial", 10, "bold"),
+            font=("Arial", 10, "bold")
         ).pack(anchor="w", padx=10, pady=2)
 
-        self.date_selector = DateSelector(left_panel)
+        self.date_selector = DateSelector(
+            left_panel,
+            years=years,
+            default_year=years[0] if years else None,
+            default_quarter="Q1",
+        )
         self.date_selector.pack(anchor="w", padx=10, pady=2)
+
+        tk.Label(
+            left_panel,
+            text="End Date:",
+            bg=BACKGROUND_COLOR,
+            font=("Arial", 10, "bold")
+        ).pack(anchor="w", padx=10, pady=2)
+
+        self.end_selector = DateSelector(
+            left_panel,
+            years=years,
+            default_year=years[-1] if years else None,
+            default_quarter="Q4",
+        )
+        self.end_selector.pack(anchor="w", padx=10, pady=2)
 
         self.metric_widgets: list[MetricInput] = []
         for header, metrics in METRIC_CATEGORIES.items():
@@ -62,7 +85,7 @@ class InvestmentApp:
             text="Backtest Strategy",
             bg=BACKGROUND_COLOR,
             font=("Arial", 10, "bold"),
-        ).pack(anchor="w", padx=10, pady=(5, 2))
+        ).pack(anchor="w", padx=10, pady=2)
 
         self.strategy_selector = StrategySelector(
             left_panel, list(self.strategies.keys())
@@ -73,7 +96,7 @@ class InvestmentApp:
         self.run_button = RunButton(
             left_panel, command=self.controller.run_backtest
         )
-        self.run_button.pack(padx=20, pady=5, fill=tk.X)
+        self.run_button.pack(padx=20, pady=2, fill=tk.X)
 
         bottom_panel = tk.Frame(self.root, bg=BACKGROUND_COLOR)
         bottom_panel.pack(side=tk.BOTTOM, fill=tk.X)
